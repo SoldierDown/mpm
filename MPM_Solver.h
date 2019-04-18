@@ -34,7 +34,7 @@ public:
     vector<Node> nodes;
     vector<Particle> particles;
     vector<Plane_Obstacle> plane_obstacles;
-    MPM_Solver(/* args */): E{1e4}, nu{0.2}, hardening{5}, dt{1e-4}, frame_dt{1e-3},
+    MPM_Solver(): E{1e4}, nu{0.2}, hardening{5}, dt{1e-4}, frame_dt{1e-3},
                             plastic{true}, gravity{Vec{0.0, -200.0}}                        
     {
         Init();
@@ -80,9 +80,9 @@ public:
 
     void Add_Obstacles()
     {
-        Plane_Obstacle ground(Vec(0.0, 0.05), Vec(0.0, 1.0));
+        Plane_Obstacle ground(Vec(0.0, 0.05), Vec(0.0, 1.0), Vec(1.0, 0.0));
         plane_obstacles.push_back(ground);
-        Plane_Obstacle wall(Vec(0.05, 0.0), Vec(1.0, 0.0));
+        Plane_Obstacle wall(Vec(0.05, 0.0), Vec(1.0, 0.0), Vec(0.0, 1.0));
         plane_obstacles.push_back(wall);
     }
 
@@ -110,6 +110,7 @@ public:
 
     void Step()
     {
+        //Set_dt();
         Reset_Node();
         Rasterize();
         Collision_Detection();
@@ -198,20 +199,37 @@ public:
                     double x = (double) i / n;
                     double y = (double) j / n;
 
-                    double boundary = 0.05;
-                    if(x < boundary || x > 1 - boundary || y > 1 - boundary)
+                    // double boundary = 0.05;
+                    // if(x < boundary || x > 1 - boundary || y > 1 - boundary)
+                    // {
+                    //     node.mass = 0.0;
+                    //     node.v.setZero();
+                    //     node.p.setZero();
+                    // }
+                    // if(y < boundary)
+                    // {
+                    //     int sign = (node.v(0) > 0.0 ? 1: -1);
+                    //     node.v(0) = sign * (max(0.0, abs(node.v(0)) - 1 * abs(node.v(1))));
+                    //     node.v(1) = max(0.0, node.v(1));
+                    //     node.p = node.mass * node.v;
+                    // }
+                    Vec pos(x, y);
+                    for(auto &pl: plane_obstacles)
                     {
-                        node.mass = 0.0;
-                        node.v.setZero();
-                        node.p.setZero();
+                        if(pl.normal.dot(pos - pl.level) < 0)
+                        {
+                            double vn = node.v.dot(pl.normal);
+                            double vt = node.v.dot(pl.tang);
+                            int sign = vt > 0.0 ? 1: -1;
+                            double vnc = max(0.0, vn);
+                            double vtc = sign * (max(0.0, abs(vt) - pl.mu * abs(vn)));
+                            node.v = vnc * pl.normal + vtc * pl.tang;
+                            if(vnc == 0.0 && vtc == 0.0) node.mass = 0.0;
+                            node.p = node.mass * node.v;
+                        }
                     }
-                    if(y < boundary)
-                    {
-                        int sign = (node.v(0) > 0.0 ? 1: -1);
-                        node.v(0) = sign * (max(0.0, abs(node.v(0)) - 1 * abs(node.v(1))));
-                        node.v(1) = max(0.0, node.v(1));
-                        node.p = node.mass * node.v;
-                    }
+
+
 
                 }
             }

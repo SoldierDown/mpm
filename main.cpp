@@ -1,4 +1,6 @@
 #include <iostream>
+#include <sys/stat.h> 
+#include <string.h>
 #include <GL/glut.h>
 #include "MPM_Solver.h"
 
@@ -9,6 +11,8 @@ void timer(int i_);
 int time_ = 0;
 float x = 0;
 float y = 0;
+
+string dir_name("boundary_");
 
 MPM_Solver mpm;
 
@@ -65,7 +69,7 @@ void display()
     if(time_ % int(mpm.frame_dt/mpm.dt) == 0) 
     {
         char path[256];
-        sprintf(path, "Frame%05d.tga", time_);
+        sprintf(path, "./%s/Frame%05d.tga", dir_name.c_str(), time_);
         Screendump(path, WIDTH, WIDTH);
         drawSquare();
     }
@@ -75,6 +79,7 @@ void display()
 
 int main (int argc, char **argv)
 {
+    mkdir(dir_name.c_str(), 0777);
     glutInit (&argc, argv);
     glutInitDisplayMode (GLUT_SINGLE | GLUT_RGBA);
     glutInitWindowSize (WIDTH, WIDTH);

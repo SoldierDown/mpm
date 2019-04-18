@@ -12,10 +12,9 @@ private:
 public:
     Vec level;
     Vec normal;
-    Plane_Obstacle(Vec level_, Vec normal_): level{level_}, normal{normal_}
-    {
-            
-    }
+    Vec tang;
+    double mu;
+    Plane_Obstacle(Vec level_, Vec normal_, Vec tang_): level{level_}, normal{normal_}, tang{tang_}, mu{0.5}{}
     ~Plane_Obstacle(){}
 };
 

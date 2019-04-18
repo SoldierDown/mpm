@@ -4,6 +4,13 @@
 #include <eigen3/Eigen/Dense>
 using namespace Eigen;
 using Vec = Vector2d;
+using Mat = Matrix3d;
+
+double min(double a_, double b_)
+{
+    if(a_ < b_) return a_;
+    else return b_;
+}
 
 double max(double a_, double b_)
 {
